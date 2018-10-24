@@ -1,0 +1,104 @@
+<!doctype html>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  <!-- Categories: success (green), info (blue), warning (yellow), danger (red) -->
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }} alert-dismissible" role="alert" align="center">
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <!-- <strong>Title</strong> --> {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<html>
+
+{% include "head.html" %}
+<body>
+   <div class="wrapper">
+        <!-- Sidebar  -->
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <h3>Web SSH Client</h3>
+            </div>
+
+            <ul class="list-unstyled components">
+                <p>Servers</p>
+                <li class="active">
+                    <a href="#">FILE-SERV</a>
+                </li>
+                <li>
+                    <a href="#group1" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Production</a>
+                    <ul class="collapse list-unstyled" id="group1">
+                        <li>
+                            <a href="#">Server 1</a>
+                        </li>
+                        <li>
+                            <a href="#">Server 2</a>
+                        </li>
+                        <li>
+                            <a href="#">Server 3</a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#group2" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Development</a>
+                    <ul class="collapse list-unstyled" id="group2">
+                        <li>
+                            <a href="#">Server 1</a>
+                        </li>
+                        <li>
+                            <a href="#">Server 2</a>
+                        </li>
+                        <li>
+                            <a href="#">Server 3</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+
+            <ul class="list-unstyled CTAs">
+                <li>
+                    <a href="https://bootstrapious.com/tutorial/files/sidebar.zip" class="download">Add Server</a>
+                </li>
+                <li>
+                    <a href="https://bootstrapious.com/p/bootstrap-sidebar" class="article">Add Folder</a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Page Content  -->
+        <div id="content">
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#sidebarCollapse').on('click', function () {
+                $('#sidebar').toggleClass('active');
+            });
+        });
+
+
+jQuery(function($, undefined) {
+    $('#content').terminal(function(command) {
+        if (command !== '') {
+            var result = window.eval(command);
+            if (result != undefined) {
+                this.echo(String(result));
+            }
+        }
+    }, {
+        greetings: 'Web SSH Client',
+        name: 'js_demo',
+        prompt: 'js> '
+    });
+});
+
+
+
+
+
+    </script>
+    </body>
+<html>
