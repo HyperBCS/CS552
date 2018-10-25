@@ -68,7 +68,7 @@
         </nav>
 
         <!-- Page Content  -->
-        <div id="content">
+        <div id="content" onkeydown="return goToFirst();">
         </div>
     </div>
 
@@ -79,25 +79,93 @@
             });
         });
 
+function goToFirst(evt) {
+    var e = event || evt; // for trans-browser compatibility
+    var key = e.which || e.keyCode;
+    console.log(key)
+    if((key == 8 || key == 9) || (key >= 37 && key <= 40)){
+      console.log("special")
+      socket.emit('keypress', {key: key});
+    }
+    // use e.keyCode
+};
 
-jQuery(function($, undefined) {
-    $('#content').terminal(function(command) {
+var term = $('#content').terminal(function(command) {
         if (command !== '') {
-            var result = window.eval(command);
-            if (result != undefined) {
-                this.echo(String(result));
-            }
+              socket.emit('keypress', {key: 10});
         }
     }, {
         greetings: 'Web SSH Client',
         name: 'js_demo',
-        prompt: 'js> '
+        prompt: '',
+        echoCommand: false,
+        scrollOnEcho: true,
+        height: 100,
+        keypress: function(e, term) {
+            socket.emit('keypress', {key: e.which});
+        },
+        keydown: function(e) {
+            //disable keyboard when animating
+            if(e.ctrlKey & e.which == 67){
+              socket.emit('keypress', {key: 3});
+            }
+        }
     });
-});
+term.set_mask('')
+var last;
+var prompt = term.get_prompt();
+(function(echo) {
+    term.echo = function(arg, options) {
+        console.log("*&*&")
+        var settings = $.extend({
+            newline: true
+        }, options);
+        if (!prompt) {
+            prompt = this.get_prompt();
+        }
+        if (settings.newline === false) {
+            // this probably can be simplify because terminal handle
+            // newlines in prompt
+            console.log("HHHHH")
+            last += arg;
+            arg = this.get_prompt() + arg;
+            var arr = arg.split('\n');
+            var last_line;
+            if (arr.length === 1) {
+                last_line = arg;
+            } else {
+                echo(arr.slice(0, -1).join('\n'), options);
+                last_line = arr[arr.length - 1];
+            }
+            this.set_prompt(last_line);
+        } else {
+            if (prompt) {
+                this.set_prompt(prompt);
+            }
+            if (last) {
+                echo(last + arg, options);
+            } else {
+                echo(arg, options);
+            }
+            last = '';
+            prompt = '';
+        }
+    };
+})(term.echo);
 
+var socket = io.connect('http://' + document.domain + ':' + location.port);
+    socket.on('connect', function() {
+      console.log("connected")
+      socket.emit('keypress', {key: 13});
+    });
 
-
-
+    socket.on('response', (data) => {
+      clean = $.terminal.from_ansi(data['data'])
+      if(clean != ""){
+        term.echo(clean, {newline: false})
+      }
+      console.log(data);
+    });
 
     </script>
     </body>
