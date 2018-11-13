@@ -125,10 +125,7 @@ var socket = io.connect('http://' + document.domain + ':' + location.port);
     });
 
     socket.on('response', (data) => {
-      clean = $.terminal.from_ansi(data['data'])
-      if(clean != ""){
-        t.interpret(data['data']);
-      }
+      t.interpret(data['data']);
       console.log(data['data']);
     });
 
