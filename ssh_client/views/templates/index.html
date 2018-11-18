@@ -59,7 +59,7 @@
 
             <ul class="list-unstyled CTAs">
                 <li>
-                    <a href="https://bootstrapious.com/tutorial/files/sidebar.zip" class="download">Add Server</a>
+                    <a href="" class="addserver"  data-toggle="modal" data-target="#exampleModalLong">Add Server</a>
                 </li>
                 <li>
                     <a href="https://bootstrapious.com/p/bootstrap-sidebar" class="article">Add Folder</a>
@@ -71,16 +71,88 @@
         <div id="content" onkeydown="return goToFirst();">
         </div>
     </div>
-
+    <!-- <div class="dialog .col-md-6 .col-md-offset-3" id="myform"  >
+        <form>
+            <div class="form-group">
+                <label for="exampleInputHostname1">Hostname</label>
+                <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Email">
+              </div>
+              <div class="form-group">
+                <label for="exampleInputUsername1">Username</label>
+                <input type="text" class="form-control" id="exampleInputPassword1" placeholder="Password">
+              </div>
+              <div class="form-group">
+                <label for="exampleInputPassword1">Password</label>
+                <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+              </div>
+              
+              <button type="save" class="btn btn-default btnOK">Submit</button>
+        </form>
+      </div> -->
+      <!-- Button trigger modal -->
+  <!-- Modal -->
+  <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLongTitle">Add Server</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <form id="server-form">
+                <div class="form-group">
+                        <label for="exampleFormControlSelect1">Server select</label>
+                        <select class="form-control" id="exampleFormControlSelect1" form="server-form" name="index">
+                            <option>1</option>
+                            <option>2</option>
+                            <option>3</option>
+                        </select>
+                </div>
+                <div class="form-group">
+                    <label for="exampleInputHostname1">Hostname</label>
+                    <input type="text" name="hostname" class="form-control" id="exampleInputEmail1" placeholder="Hostname">
+                  </div>
+                  <div class="form-group">
+                    <label for="exampleInputUsername1">Username</label>
+                    <input type="text" name="username" class="form-control" placeholder="Username">
+                  </div>
+                  <div class="form-group">
+                    <label for="exampleInputPassword1">Password</label>
+                    <input type="password" name="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+                  </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id="form-save">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
     <script type="text/javascript">
+    var storage = window.localStorage;
         $(document).ready(function () {
             $('#sidebarCollapse').on('click', function () {
                 $('#sidebar').toggleClass('active');
             });
+        $('#form-save').click(function(){
+            var d = {};
+            var data = $('#server-form').serializeArray();
+            $.each(data, function() {
+                d[this.name] = this.value;
+            });
+            var arr = [];
+            arr[0]=d["hostname"];
+            arr[1]=d["username"];
+            arr[2]=d["password"];
+            storage.setItem(d["index"],arr.toString());
+        });
         });
 
 function goToFirst(evt) {
-    var e = event || evt; // for trans-browser compatibility
+    var e = event || evt; // for trans-browser compatibility 
     var key = e.which || e.keyCode;
     console.log(key)
     if((key == 8 || key == 9) || (key >= 37 && key <= 40)){
