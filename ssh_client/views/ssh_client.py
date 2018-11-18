@@ -23,18 +23,19 @@ def handle_my_custom_event2(resp):
     # session = client.open_channel(kind='session')
     try:
         key = resp['key']
-        print(key)
-        print("Sending ",chr(resp['key']))
-        char = chr(resp['key'])
-        if key == 37:
-            char = b'\x1b[D'
-        elif key == 38:
-            char = b'\x1b[A'
-        elif key == 39:
-            char = b'\x1b[C'
-        elif key == 40:
-            char = b'\x1b[B'
-        session.send(char)
+        print("Sending ",key)
+
+        # print("Sending ",chr(resp['key']))
+        # char = chr(resp['key'])
+        # if key == 37:
+        #     char = b'\x1b[D'
+        # elif key == 38:
+        #     char = b'\x1b[A'
+        # elif key == 39:
+        #     char = b'\x1b[C'
+        # elif key == 40:
+        #     char = b'\x1b[B'
+        session.send(key)
     except socket.timeout:
         pass
     print("hmm")
