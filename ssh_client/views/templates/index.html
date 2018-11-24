@@ -44,14 +44,8 @@
                 <li>
                     <a href="#group2" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Development</a>
                     <ul class="collapse list-unstyled" id="group2">
-                        <li>
-                            <a href="#">Server 1</a>
-                        </li>
-                        <li>
-                            <a href="#">Server 2</a>
-                        </li>
-                        <li>
-                            <a href="#">Server 3</a>
+                        <li v-for="item in items">
+                                <a href="#">{[item.remark]}</a>
                         </li>
                     </ul>
                 </li>
@@ -59,10 +53,10 @@
 
             <ul class="list-unstyled CTAs">
                 <li>
-                    <a href="" class="addserver"  data-toggle="modal" data-target="#exampleModalLong">Add Server</a>
+                    <a href="#" class="addserver"  data-toggle="modal" data-target="#exampleModalLong">Add Server</a>
                 </li>
-                <li>
-                    <a href="https://bootstrapious.com/p/bootstrap-sidebar" class="article">Add Folder</a>
+                <li id="edit">
+                    <a href="#" class="editserver" data-toggle="modal" data-target="#edit-modal">Edit Server</a>
                 </li>
             </ul>
         </nav>
@@ -71,24 +65,6 @@
         <div id="content" style="position:relative; width:100%; height:100vh">
         </div>
     </div>
-    <!-- <div class="dialog .col-md-6 .col-md-offset-3" id="myform"  >
-        <form>
-            <div class="form-group">
-                <label for="exampleInputHostname1">Hostname</label>
-                <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Email">
-              </div>
-              <div class="form-group">
-                <label for="exampleInputUsername1">Username</label>
-                <input type="text" class="form-control" id="exampleInputPassword1" placeholder="Password">
-              </div>
-              <div class="form-group">
-                <label for="exampleInputPassword1">Password</label>
-                <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
-              </div>
-              
-              <button type="save" class="btn btn-default btnOK">Submit</button>
-        </form>
-      </div> -->
       <!-- Button trigger modal -->
   <!-- Modal -->
   <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
@@ -103,16 +79,12 @@
         <div class="modal-body">
             <form id="server-form">
                 <div class="form-group">
-                        <label for="exampleFormControlSelect1">Server select</label>
-                        <select class="form-control" id="exampleFormControlSelect1" form="server-form" name="index">
-                            <option>1</option>
-                            <option>2</option>
-                            <option>3</option>
-                        </select>
-                </div>
+                        <label for="exampleInputRemark1">Remark</label>
+                        <input type="text" name="remark" class="form-control"placeholder="Remark">
+                    </div>
                 <div class="form-group">
                     <label for="exampleInputHostname1">Hostname</label>
-                    <input type="text" name="hostname" class="form-control" id="exampleInputEmail1" placeholder="Hostname">
+                    <input type="text" name="hostname" class="form-control"placeholder="Hostname">
                   </div>
                   <div class="form-group">
                     <label for="exampleInputUsername1">Username</label>
@@ -126,30 +98,147 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary" id="form-save">Save changes</button>
+          <button type="button" class="btn btn-primary" id="form-save" data-dismiss="modal">Save changes</button>
         </div>
       </div>
     </div>
   </div>
+
+  <div class="modal fade"  tabindex="-1" id = "edit-modal" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLongTitle">Edit Server</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <form id="edit-form">
+                <div class="form-group">
+                    <label for="exampleSelect1">Server select</label>
+                    <select class="form-control" id="server-select"  v-model="select" @change="show_info(select)" >
+                      <option v-for="item in items" v-bind:value="item">{[item.remark]}</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="exampleInputHostname1">Remark</label>
+                    <input type="text" name="hostname" class="form-control" placeholder="Remark" v-model="remark">
+                  </div>
+                <div class="form-group">
+                    <label for="exampleInputHostname1">Hostname</label>
+                    <input type="text" name="hostname" class="form-control" placeholder="Hostname" v-model="hostname">
+                  </div>
+                  <div class="form-group">
+                    <label for="exampleInputUsername1">Username</label>
+                    <input type="text" name="username" class="form-control" placeholder="Username" v-model="username">
+                  </div>
+                  <div class="form-group">
+                    <label for="exampleInputPassword1">Password</label>
+                    <input type="password" name="password" class="form-control" placeholder="New Password" v-model="password">
+                  </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id="server-delete" @click="delete_server" data-dismiss="modal">Delete server</button>
+          <button type="button" class="btn btn-primary" id="edit-save" @click="edit_server" data-dismiss="modal">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
     <script type="text/javascript">
-    var storage = window.localStorage;
-        $(document).ready(function () {
-            $('#sidebarCollapse').on('click', function () {
-                $('#sidebar').toggleClass('active');
-            });
-        $('#form-save').click(function(){
-            var d = {};
-            var data = $('#server-form').serializeArray();
-            $.each(data, function() {
-                d[this.name] = this.value;
-            });
-            var arr = [];
-            arr[0]=d["hostname"];
-            arr[1]=d["username"];
-            arr[2]=d["password"];
-            storage.setItem(d["index"],arr.toString());
-        });
-        });
+var storage = window.localStorage;
+function read_serverinfo(){
+    if(typeof(storage["serverinfo"]) == "undefined" || storage["serverinfo"] == ""){
+        storage["serverinfo"] = [];
+        serverinfo = [];
+    }
+    else{
+        serverinfo = JSON.parse(storage["serverinfo"]);
+    }
+}
+
+$(document).ready(function () {
+    read_serverinfo();
+    $('#sidebarCollapse').on('click', function () {
+        $('#sidebar').toggleClass('active');
+    });
+
+$('#form-save').click(function(){
+    read_serverinfo();
+    var d = {};
+    var data = $('#server-form').serializeArray();
+    $.each(data, function() {
+        d[this.name] = this.value;
+    });
+    var arr = [];
+    serverinfo.push(d);
+    storage.setItem("serverinfo",JSON.stringify(serverinfo));
+    group2.items = JSON.parse(storage.getItem("serverinfo"));
+});
+});
+
+
+var group2 = new Vue({
+delimiters: ['{[', ']}'],
+  el: '#group2',
+  data: {
+    items: JSON.parse(storage.getItem("serverinfo"))
+  }
+});
+
+var edit = new Vue({
+delimiters: ['{[', ']}'],
+  el: '#edit-modal',
+  data: {
+    items: JSON.parse(storage.getItem("serverinfo")),
+    hostname:'',
+    username:'',
+    password:'',
+    remark:'',
+    select:''
+  },
+
+  methods: {
+    show_info: function(key) {
+        // console.log(key);
+        this.hostname = key.hostname;
+        this.username = key.username;
+        this.password = key.password;
+        this.remark = key.remark;
+    },
+    edit_server: function (event) {
+        read_serverinfo();
+        // console.log(this.hostname);
+        for (let i=0;i<serverinfo.length; i++){
+            if(serverinfo[i].remark == this.select.remark){
+                serverinfo[i].remark = this.remark;
+                serverinfo[i].hostname = this.hostname;
+                serverinfo[i].username = this.username;
+                serverinfo[i].password = this.password;
+                storage.setItem("serverinfo",JSON.stringify(serverinfo));
+                group2.items = JSON.parse(storage.getItem("serverinfo"));
+                this.items = JSON.parse(storage.getItem("serverinfo"));
+                break;
+            }
+        }
+    },
+    delete_server: function (event){
+        read_serverinfo();
+        for (let i=0;i<serverinfo.length; i++){
+            if(serverinfo[i].remark == this.select.remark){
+                serverinfo.splice(i,1);
+                storage.setItem("serverinfo",JSON.stringify(serverinfo));
+                group2.items = JSON.parse(storage.getItem("serverinfo"));
+                this.items = JSON.parse(storage.getItem("serverinfo"));
+                break;
+            }
+        }
+    }
+  }
+})
 function setupHterm() {
   const t = new hterm.Terminal("light");
 
