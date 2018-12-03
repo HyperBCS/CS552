@@ -45,7 +45,7 @@
                     <a href="#group2" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Development</a>
                     <ul class="collapse list-unstyled" id="group2">
                         <li v-for="item in items">
-                                <a href="#">{[item.remark]}</a>
+                                <a href="#" @click="login(item)">{[item.remark]}</a>
                         </li>
                     </ul>
                 </li>
@@ -94,6 +94,10 @@
                     <label for="exampleInputPassword1">Password</label>
                     <input type="password" name="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
                   </div>
+                  <div class="form-group">
+                    <label>Folder</label>
+                    <input type="text" name="folder" class="form-control" placeholder="Default folder is /" v-model="folder">
+                  </div>
             </form>
         </div>
         <div class="modal-footer">
@@ -136,6 +140,10 @@
                   <div class="form-group">
                     <label for="exampleInputPassword1">Password</label>
                     <input type="password" name="password" class="form-control" placeholder="New Password" v-model="password">
+                  </div>
+                  <div class="form-group">
+                    <label>Folder</label>
+                    <input type="text" name="folder" class="form-control" placeholder="Default folder is /" v-model="folder">
                   </div>
             </form>
         </div>
@@ -186,6 +194,13 @@ delimiters: ['{[', ']}'],
   el: '#group2',
   data: {
     items: JSON.parse(storage.getItem("serverinfo"))
+  },
+  methods: {
+    login: function(item) {
+      // alert(item.remark);
+      var socket = io.connect('http://' + document.domain + ':' + location.port);
+      socket.emit("login",item);
+    }
   }
 });
 
@@ -198,7 +213,8 @@ delimiters: ['{[', ']}'],
     username:'',
     password:'',
     remark:'',
-    select:''
+    select:'',
+    folder:''
   },
 
   methods: {
@@ -208,6 +224,7 @@ delimiters: ['{[', ']}'],
         this.username = key.username;
         this.password = key.password;
         this.remark = key.remark;
+        this.folder = key.folder;
     },
     edit_server: function (event) {
         read_serverinfo();
@@ -218,6 +235,7 @@ delimiters: ['{[', ']}'],
                 serverinfo[i].hostname = this.hostname;
                 serverinfo[i].username = this.username;
                 serverinfo[i].password = this.password;
+                serverinfo[i].folder = this.folder;
                 storage.setItem("serverinfo",JSON.stringify(serverinfo));
                 group2.items = JSON.parse(storage.getItem("serverinfo"));
                 this.items = JSON.parse(storage.getItem("serverinfo"));

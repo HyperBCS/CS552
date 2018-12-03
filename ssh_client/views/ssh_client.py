@@ -4,6 +4,7 @@ from flask_socketio import send, emit
 from .. import socketio, client, session
 import sys, traceback, socket
 from paramiko.py3compat import u
+import paramiko
 import select
 
 page = Blueprint('main', __name__, template_folder='templates')
@@ -68,3 +69,7 @@ def handle_my_custom_event2(resp):
 #     stdout_data = ''.join(map(chr,stdout_data))
 #     print(stdout_data)
 #     emit('response', {'data': stdout_data})
+
+@socketio.on('login')
+def ssh_login(info):
+    print(info)
