@@ -158,6 +158,9 @@
 
     <script type="text/javascript">
 var storage = window.localStorage;
+var curr_key = 0;
+var socket;
+var t_g;
 function read_serverinfo(){
     if(typeof(storage["serverinfo"]) == "undefined" || storage["serverinfo"] == ""){
         storage["serverinfo"] = [];
@@ -181,6 +184,7 @@ $('#form-save').click(function(){
     $.each(data, function() {
         d[this.name] = this.value;
     });
+    d['key'] = Math.floor(Math.random() * 100);
     var arr = [];
     serverinfo.push(d);
     storage.setItem("serverinfo",JSON.stringify(serverinfo));
@@ -198,8 +202,13 @@ delimiters: ['{[', ']}'],
   methods: {
     login: function(item) {
       // alert(item.remark);
-      var socket = io.connect('http://' + document.domain + ':' + location.port);
+      if (item.key != curr_key){
+      curr_key = item.key;
+      t_g.setCursorPosition(0,0)
+      t_g.clear()
+      t_g.clearScrollback()
       socket.emit("login",item);
+      }
     }
   }
 });
@@ -259,7 +268,7 @@ delimiters: ['{[', ']}'],
 })
 function setupHterm() {
   const t = new hterm.Terminal("light");
-
+  t_g = t;
   t.onTerminalReady = function() {
   // Create a new terminal IO object and give it the foreground.
   // (The default IO object just prints warning messages about unhandled
@@ -273,8 +282,8 @@ t.prefs_.set('cursor-color', 'rgba(255, 255, 255, 1)')
   io.onVTKeystroke = (str) => {
     // Do something useful with str here.
     // For example, Secure Shell forwards the string onto the NaCl plugin.
-    socket.emit('keypress', {key: str});
-    console.log(str)
+    socket.emit('keypress', {sess_key: curr_key, key: str});
+    socket.emit('keypress', {sess_key: -1, key: str});
   };
 
   io.sendString = (str) => {
@@ -297,20 +306,18 @@ t.prefs_.set('cursor-color', 'rgba(255, 255, 255, 1)')
 t.decorate(document.querySelector('#content'));
 t.installKeyboard();
 
-var socket = io.connect('http://' + document.domain + ':' + location.port);
-    socket.on('connect', function() {
+socket = io.connect('http://' + document.domain + ':' + location.port);
+    socket.on('connect', function(client) {
       console.log("connected")
-      socket.emit('keypress', {key: '\n'});
+      socket.emit('keypress', {sess_key: curr_key, key: '\n'});
     });
 
     socket.on('response', (data) => {
       t.interpret(data['data']);
-      console.log(data['data']);
     });
-
+setInterval(function(){ socket.emit('keypress', {sess_key: -1, key: 0}); }, 100);
 
 }
-
 
 window.onload = function() {
   lib.init(setupHterm);
