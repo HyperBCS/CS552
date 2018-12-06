@@ -29,15 +29,15 @@
                 </li>
                 <template v-for="(value,key) in items">
                 <li>
-                    <a href="#group" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">{[key]}</a>
-                    <ul class="collapse list-unstyled" id="group">
+                    <a v-bind:href="'#'+key" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">{[key]}</a>
+                    <ul class="collapse list-unstyled" v-bind:id="key">
                       <li v-for="item in value">
                       <a href="#" @click="login(item)">{[item.remark]}</a>
                     </li>
                     </ul>
                 </li>
               </template>
-                <li>
+                <!-- <li>
                     <a href="#group1" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Production</a>
                     <ul class="collapse list-unstyled" id="group1">
                     </ul>
@@ -49,7 +49,7 @@
                                 <a href="#" @click="login(item)">{[item.remark]}</a>
                         </li>
                     </ul>
-                </li>
+                </li> -->
                 <li>
                     <a data-toggle="modal" aria-expanded="false" class = "btn"  data-target="#folder-modal" style = "text-align: left;">
                       Add Folder
@@ -183,13 +183,13 @@
               <form id="">
                     <div class="form-group">
                       <label for="exampleInputHostname1">Folder name</label>
-                      <input type="text" name="hostname" class="form-control" placeholder="Folder name">
+                      <input type="text" name="folder" class="form-control" placeholder="Folder name" v-model="folder"> 
                     </div>
               </form>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary" id=""  data-dismiss="modal">Create</button>
+            <button type="button" class="btn btn-primary" data-dismiss="modal" @click="create_folder">Create</button>
           </div>
         </div>
       </div>
@@ -234,6 +234,22 @@ $(document).ready(function () {
 // });
 });
 
+var folder = new Vue({
+  delimiters: ['{[', ']}'],
+  el:'#folder-modal',
+  data:{
+    folder:'',
+  },
+  methods:{
+    create_folder: function(event){
+      read_serverinfo();
+      if(typeof(serverinfo[this.folder]) == "undefined" || typeof(serverinfo[this.folder]) == "" )
+        serverinfo[this.folder] = {};
+      storage.setItem("serverinfo",JSON.stringify(serverinfo));
+    }
+  }
+})
+
 var sidebar = new Vue({
   delimiters: ['{[', ']}'],
   el:'#sidebar-folder',
@@ -242,7 +258,7 @@ var sidebar = new Vue({
   },
   methods:{
     login: function(item) {
-      alert(item.remark);
+      // alert(item.remark);
       if (item.key != curr_key){
       curr_key = item.key;
       t_g.setCursorPosition(0,0)
@@ -286,25 +302,25 @@ var group1 = new Vue({
   }
 });
 
-var group2 = new Vue({
-delimiters: ['{[', ']}'],
-  el: '#group2',
-  data: {
-    items: JSON.parse(storage.getItem("serverinfo"))
-  },
-  methods: {
-    login: function(item) {
-      // alert(item.remark);
-      if (item.key != curr_key){
-      curr_key = item.key;
-      t_g.setCursorPosition(0,0)
-      t_g.clear()
-      t_g.clearScrollback()
-      socket.emit("login",item);
-      }
-    }
-  }
-});
+// var group2 = new Vue({
+// delimiters: ['{[', ']}'],
+//   el: '#group2',
+//   data: {
+//     items: JSON.parse(storage.getItem("serverinfo"))
+//   },
+//   methods: {
+//     login: function(item) {
+//       // alert(item.remark);
+//       if (item.key != curr_key){
+//       curr_key = item.key;
+//       t_g.setCursorPosition(0,0)
+//       t_g.clear()
+//       t_g.clearScrollback()
+//       socket.emit("login",item);
+//       }
+//     }
+//   }
+// });
 
 var edit = new Vue({
 delimiters: ['{[', ']}'],
@@ -345,7 +361,7 @@ delimiters: ['{[', ']}'],
                 serverinfo[this.folder][i].password = this.password;
                 serverinfo[this.folder][i].folder = this.folder;
                 storage.setItem("serverinfo",JSON.stringify(serverinfo));
-                group2.items = JSON.parse(storage.getItem("serverinfo"));
+                sidebar.items = JSON.parse(storage.getItem("serverinfo"));
                 this.items = JSON.parse(storage.getItem("serverinfo"));
                 break;
             }
@@ -357,7 +373,7 @@ delimiters: ['{[', ']}'],
             if(serverinfo[this.folder][i].hostname == this.select.hostname){
                 serverinfo[this.folder].splice(i,1);
                 storage.setItem("serverinfo",JSON.stringify(serverinfo));
-                group2.items = JSON.parse(storage.getItem("serverinfo"));
+                sidebar.items = JSON.parse(storage.getItem("serverinfo"));
                 this.items = JSON.parse(storage.getItem("serverinfo"));
                 break;
             }
