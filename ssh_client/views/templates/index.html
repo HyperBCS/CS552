@@ -22,23 +22,24 @@
                 <h3>Web SSH Client</h3>
             </div>
 
-            <ul class="list-unstyled components">
+            <ul class="list-unstyled components" id="sidebar-folder">
                 <p>Servers</p>
                 <li class="active">
                     <a href="#">FILE-SERV</a>
                 </li>
+                <template v-for="(value,key) in items">
+                <li>
+                    <a href="#group" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">{[key]}</a>
+                    <ul class="collapse list-unstyled" id="group">
+                      <li v-for="item in value">
+                      <a href="#" @click="login(item)">{[item.remark]}</a>
+                    </li>
+                    </ul>
+                </li>
+              </template>
                 <li>
                     <a href="#group1" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Production</a>
                     <ul class="collapse list-unstyled" id="group1">
-                        <li>
-                            <a href="#">Server 1</a>
-                        </li>
-                        <li>
-                            <a href="#">Server 2</a>
-                        </li>
-                        <li>
-                            <a href="#">Server 3</a>
-                        </li>
                     </ul>
                 </li>
                 <li>
@@ -49,11 +50,17 @@
                         </li>
                     </ul>
                 </li>
+                <li>
+                    <a data-toggle="modal" aria-expanded="false" class = "btn"  data-target="#folder-modal" style = "text-align: left;">
+                      Add Folder
+                    </a>
+                  </li>
             </ul>
+
 
             <ul class="list-unstyled CTAs">
                 <li>
-                    <a href="#" class="addserver"  data-toggle="modal" data-target="#exampleModalLong">Add Server</a>
+                    <a href="#" class="addserver"  data-toggle="modal" data-target="#addserver">Add Server</a>
                 </li>
                 <li id="edit">
                     <a href="#" class="editserver" data-toggle="modal" data-target="#edit-modal">Edit Server</a>
@@ -67,7 +74,7 @@
     </div>
       <!-- Button trigger modal -->
   <!-- Modal -->
-  <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+  <div class="modal fade" id="addserver" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
@@ -77,32 +84,36 @@
           </button>
         </div>
         <div class="modal-body">
-            <form id="server-form">
+            <form>
+                <div class="form-group">
+                    <label for="exampleSelect1">Folder select</label>
+                    <select class="form-control" id="folder-select" name="folder" v-model="folder">
+                      <option value="Production">Production</option>
+                      <option value="Development">Development</option>
+                      <option v-for="item in items" v-bind:value="item.folder">{[item.folder]}</option>
+                    </select>
+                  </div>
                 <div class="form-group">
                         <label for="exampleInputRemark1">Remark</label>
-                        <input type="text" name="remark" class="form-control"placeholder="Remark">
+                        <input type="text" name="remark" class="form-control"placeholder="Remark"  v-model="remark">
                     </div>
                 <div class="form-group">
                     <label for="exampleInputHostname1">Hostname</label>
-                    <input type="text" name="hostname" class="form-control"placeholder="Hostname">
+                    <input type="text" name="hostname" class="form-control"placeholder="Hostname"  v-model="hostname">
                   </div>
                   <div class="form-group">
                     <label for="exampleInputUsername1">Username</label>
-                    <input type="text" name="username" class="form-control" placeholder="Username">
+                    <input type="text" name="username" class="form-control" placeholder="Username" v-model="username">
                   </div>
                   <div class="form-group">
                     <label for="exampleInputPassword1">Password</label>
-                    <input type="password" name="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
-                  </div>
-                  <div class="form-group">
-                    <label>Folder</label>
-                    <input type="text" name="folder" class="form-control" placeholder="Default folder is /" v-model="folder">
+                    <input type="password" name="password" class="form-control" placeholder="Password" v-model="password">
                   </div>
             </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary" id="form-save" data-dismiss="modal">Save changes</button>
+          <button type="button" class="btn btn-primary" id="form-save" data-dismiss="modal" @click="add_server">Add Server</button>
         </div>
       </div>
     </div>
@@ -120,9 +131,15 @@
         <div class="modal-body">
             <form id="edit-form">
                 <div class="form-group">
-                    <label for="exampleSelect1">Server select</label>
+                    <label>Folder Select</label>
+                    <select class="form-control"  v-model="folder_select" @change="show_folder(folder_select)" >
+                      <option v-for="(value,key) in items" v-bind:value="key">{[key]}</option>
+                    </select>
+                  </div>
+                <div class="form-group">
+                    <label for="exampleSelect1">Server Select</label>
                     <select class="form-control" id="server-select"  v-model="select" @change="show_info(select)" >
-                      <option v-for="item in items" v-bind:value="item">{[item.remark]}</option>
+                      <option v-for="item in serverlist" v-bind:value="item">{[item.remark]}</option>
                     </select>
                   </div>
                   <div class="form-group">
@@ -139,11 +156,7 @@
                   </div>
                   <div class="form-group">
                     <label for="exampleInputPassword1">Password</label>
-                    <input type="password" name="password" class="form-control" placeholder="New Password" v-model="password">
-                  </div>
-                  <div class="form-group">
-                    <label>Folder</label>
-                    <input type="text" name="folder" class="form-control" placeholder="Default folder is /" v-model="folder">
+                    <input type="password" name="password" class="form-control" placeholder="Password" v-model="password">
                   </div>
             </form>
         </div>
@@ -156,6 +169,32 @@
     </div>
   </div>
 
+
+  <div class="modal fade"  tabindex="-1" id = "folder-modal" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLongTitle">Create Folder</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+              <form id="">
+                    <div class="form-group">
+                      <label for="exampleInputHostname1">Folder name</label>
+                      <input type="text" name="hostname" class="form-control" placeholder="Folder name">
+                    </div>
+              </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" id=""  data-dismiss="modal">Create</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script type="text/javascript">
 var storage = window.localStorage;
 var curr_key = 0;
@@ -163,8 +202,7 @@ var socket;
 var t_g;
 function read_serverinfo(){
     if(typeof(storage["serverinfo"]) == "undefined" || storage["serverinfo"] == ""){
-        storage["serverinfo"] = [];
-        serverinfo = [];
+        serverinfo = {};
     }
     else{
         serverinfo = JSON.parse(storage["serverinfo"]);
@@ -177,21 +215,76 @@ $(document).ready(function () {
         $('#sidebar').toggleClass('active');
     });
 
-$('#form-save').click(function(){
-    read_serverinfo();
-    var d = {};
-    var data = $('#server-form').serializeArray();
-    $.each(data, function() {
-        d[this.name] = this.value;
-    });
-    d['key'] = Math.floor(Math.random() * 100);
-    var arr = [];
-    serverinfo.push(d);
-    storage.setItem("serverinfo",JSON.stringify(serverinfo));
-    group2.items = JSON.parse(storage.getItem("serverinfo"));
-});
+// $('#form-save').click(function(){
+//     read_serverinfo();
+//     var d = {};
+//     var data = $('#server-form').serializeArray();
+//     $.each(data, function() {
+//         d[this.name] = this.value;
+//     });
+//     d['key'] = Math.floor(Math.random() * 100);
+//     var arr = [];
+//     alert(d['folder']);
+//     if(serverinfo[d['folder']] == "undefined" || serverinfo[d['folder']] == "" ){
+//       serverinfo[d['folder']] = [];
+//     }
+//     serverinfo[d['folder']].push(d);
+//     storage.setItem("serverinfo",JSON.stringify(serverinfo));
+//     group2.items = JSON.parse(storage.getItem("serverinfo"));
+// });
 });
 
+var sidebar = new Vue({
+  delimiters: ['{[', ']}'],
+  el:'#sidebar-folder',
+  data:{
+    items:JSON.parse(storage.getItem("serverinfo"))
+  },
+  methods:{
+    login: function(item) {
+      alert(item.remark);
+      if (item.key != curr_key){
+      curr_key = item.key;
+      t_g.setCursorPosition(0,0)
+      t_g.clear()
+      t_g.clearScrollback()
+      socket.emit("login",item);
+      }
+    }
+  },
+});
+
+var group1 = new Vue({
+  delimiters: ['{[', ']}'],
+  el: '#addserver',
+  data:{
+    items:"",
+    remark:"",
+    hostname:"",
+    username:"",
+    password:"",
+    folder:""
+  },
+  methods:{
+    add_server:function(event){
+      read_serverinfo();
+      // console.log('sys');
+      console.log(this.folder);
+      if(typeof(serverinfo[this.folder]) == "undefined" || serverinfo[this.folder] == "")
+        serverinfo[this.folder]=[];
+      var key={
+        remark:this.remark,
+        hostname:this.hostname,
+        username:this.username,
+        password:this.password,
+        folder:this.folder,
+        key:Math.floor(Math.random() * 100)
+      }
+      serverinfo[this.folder].push(key);
+      storage.setItem("serverinfo",JSON.stringify(serverinfo));
+    }
+  }
+});
 
 var group2 = new Vue({
 delimiters: ['{[', ']}'],
@@ -223,10 +316,16 @@ delimiters: ['{[', ']}'],
     password:'',
     remark:'',
     select:'',
-    folder:''
+    folder:'',
+    folder_select:'',
+    serverlist:{},
   },
 
   methods: {
+    show_folder: function(key){
+      read_serverinfo();
+      this.serverlist = serverinfo[key];
+    },
     show_info: function(key) {
         // console.log(key);
         this.hostname = key.hostname;
@@ -238,13 +337,13 @@ delimiters: ['{[', ']}'],
     edit_server: function (event) {
         read_serverinfo();
         // console.log(this.hostname);
-        for (let i=0;i<serverinfo.length; i++){
-            if(serverinfo[i].remark == this.select.remark){
-                serverinfo[i].remark = this.remark;
-                serverinfo[i].hostname = this.hostname;
-                serverinfo[i].username = this.username;
-                serverinfo[i].password = this.password;
-                serverinfo[i].folder = this.folder;
+        for (let i=0;i<serverinfo[this.folder].length; i++){
+            if(serverinfo[this.folder][i].hostname == this.select.hostname){
+                serverinfo[this.folder][i].remark = this.remark;
+                serverinfo[this.folder][i].hostname = this.hostname;
+                serverinfo[this.folder][i].username = this.username;
+                serverinfo[this.folder][i].password = this.password;
+                serverinfo[this.folder][i].folder = this.folder;
                 storage.setItem("serverinfo",JSON.stringify(serverinfo));
                 group2.items = JSON.parse(storage.getItem("serverinfo"));
                 this.items = JSON.parse(storage.getItem("serverinfo"));
@@ -254,9 +353,9 @@ delimiters: ['{[', ']}'],
     },
     delete_server: function (event){
         read_serverinfo();
-        for (let i=0;i<serverinfo.length; i++){
-            if(serverinfo[i].remark == this.select.remark){
-                serverinfo.splice(i,1);
+        for (let i=0;i<serverinfo[this.folder].length; i++){
+            if(serverinfo[this.folder][i].hostname == this.select.hostname){
+                serverinfo[this.folder].splice(i,1);
                 storage.setItem("serverinfo",JSON.stringify(serverinfo));
                 group2.items = JSON.parse(storage.getItem("serverinfo"));
                 this.items = JSON.parse(storage.getItem("serverinfo"));
