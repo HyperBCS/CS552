@@ -24,9 +24,6 @@
 
             <ul class="list-unstyled components" id="sidebar-folder">
                 <p>Servers</p>
-                <li class="active">
-                    <a href="#">FILE-SERV</a>
-                </li>
                 <template v-for="(value,key) in items">
                 <li>
                     <a v-bind:href="'#'+key" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">{[key]}</a>
@@ -231,9 +228,15 @@ var storage = window.localStorage;
 var curr_key = 0;
 var socket;
 var t_g;
+var connecting = false;
 function read_serverinfo(){
     if(typeof(storage["serverinfo"]) == "undefined" || storage["serverinfo"] == ""){
         serverinfo = {};
+        serverinfo["Development"] = []
+        storage.setItem("serverinfo",JSON.stringify(serverinfo));
+        sidebar.items = JSON.parse(storage.getItem("serverinfo"));
+        deletefolder.items = JSON.parse(storage.getItem("serverinfo"));
+        group1.items = JSON.parse(storage.getItem("serverinfo"));
     }
     else{
         serverinfo = JSON.parse(storage["serverinfo"]);
@@ -245,24 +248,6 @@ $(document).ready(function () {
     $('#sidebarCollapse').on('click', function () {
         $('#sidebar').toggleClass('active');
     });
-
-// $('#form-save').click(function(){
-//     read_serverinfo();
-//     var d = {};
-//     var data = $('#server-form').serializeArray();
-//     $.each(data, function() {
-//         d[this.name] = this.value;
-//     });
-//     d['key'] = Math.floor(Math.random() * 100);
-//     var arr = [];
-//     alert(d['folder']);
-//     if(serverinfo[d['folder']] == "undefined" || serverinfo[d['folder']] == "" ){
-//       serverinfo[d['folder']] = [];
-//     }
-//     serverinfo[d['folder']].push(d);
-//     storage.setItem("serverinfo",JSON.stringify(serverinfo));
-//     group2.items = JSON.parse(storage.getItem("serverinfo"));
-// });
 });
 
 var folder = new Vue({
@@ -294,10 +279,14 @@ var sidebar = new Vue({
     login: function(item) {
       // alert(item.remark);
       if (item.key != curr_key){
+        item['cols'] = t_g.primaryScreen_.columnCount_
+        item['rows'] = t_g.primaryScreen_.rowsArray.length
       curr_key = item.key;
       t_g.setCursorPosition(0,0)
       t_g.clear()
       t_g.clearScrollback()
+      t_g.interpret("Connecting...")
+      connecting = true
       socket.emit("login",item);
       }
     }
@@ -435,7 +424,9 @@ t.prefs_.set('cursor-color', 'rgba(255, 255, 255, 1)')
   io.onVTKeystroke = (str) => {
     // Do something useful with str here.
     // For example, Secure Shell forwards the string onto the NaCl plugin.
-    socket.emit('keypress', {sess_key: curr_key, key: str});
+     cols = t_g.primaryScreen_.columnCount_
+     rows = t_g.primaryScreen_.rowsArray.length
+    socket.emit('keypress', {sess_key: curr_key, key: str, rows: rows, cols: cols});
     socket.emit('keypress', {sess_key: -1, key: str});
   };
 
@@ -466,9 +457,23 @@ socket = io.connect('http://' + document.domain + ':' + location.port);
     });
 
     socket.on('response', (data) => {
-      t.interpret(data['data']);
+      if((data['clear'] == 1 || connecting == true) && data['error'] != 1){
+        t.setCursorPosition(0,0)
+        t.clear()
+        t.clearScrollback()
+        connecting = false
+      } else if(data['error'] == 1){
+        t.interpret(data['err_msg'])
+        return
+      }
+      try {
+        t.interpret(data['data']);
+      }
+      catch(err) {
+        console.log("Error adding text")
+      }
     });
-setInterval(function(){ socket.emit('keypress', {sess_key: -1, key: 0}); }, 100);
+setInterval(function(){ socket.emit('resize', {rows: t_g.primaryScreen_.rowsArray.length, cols: t_g.primaryScreen_.columnCount_}); }, 100);
 
 }
 
