@@ -242,7 +242,7 @@ var folder = new Vue({
     create_folder: function(event){
       read_serverinfo();
       if(typeof(serverinfo[this.folder]) == "undefined" || typeof(serverinfo[this.folder]) == "" )
-        serverinfo[this.folder] = {};
+        serverinfo[this.folder] = [];
       storage.setItem("serverinfo",JSON.stringify(serverinfo));
     }
   }
@@ -284,7 +284,7 @@ var group1 = new Vue({
       read_serverinfo();
       // console.log('sys');
       console.log(this.folder);
-      if(typeof(serverinfo[this.folder]) == "undefined" || serverinfo[this.folder] == "")
+      if(typeof(serverinfo[this.folder]) == "undefined" || typeof(serverinfo[this.folder]) == "object")
         serverinfo[this.folder]=[];
       var key={
         remark:this.remark,
