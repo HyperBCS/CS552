@@ -464,6 +464,7 @@ socket = io.connect('http://' + document.domain + ':' + location.port);
         connecting = false
       } else if(data['error'] == 1){
         t.interpret(data['err_msg'])
+        connecting = false
         return
       }
       try {
