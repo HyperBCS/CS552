@@ -88,9 +88,7 @@
                 <div class="form-group">
                     <label for="exampleSelect1">Folder select</label>
                     <select class="form-control" id="folder-select" name="folder" v-model="folder">
-                      <option value="Production">Production</option>
-                      <option value="Development">Development</option>
-                      <option v-for="item in items" v-bind:value="item.folder">{[item.folder]}</option>
+                      <option v-for="(value,key) in items" v-bind:value="key">{[key]}</option>
                     </select>
                   </div>
                 <div class="form-group">
@@ -274,7 +272,7 @@ var group1 = new Vue({
   delimiters: ['{[', ']}'],
   el: '#addserver',
   data:{
-    items:"",
+    items:JSON.parse(storage.getItem("serverinfo")),
     remark:"",
     hostname:"",
     username:"",
