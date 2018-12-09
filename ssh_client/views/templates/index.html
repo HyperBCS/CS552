@@ -50,15 +50,20 @@
                         </li>
                     </ul>
                 </li> -->
-                <li>
-                    <a data-toggle="modal" aria-expanded="false" class = "btn"  data-target="#folder-modal" style = "text-align: left;">
-                      Add Folder
-                    </a>
-                  </li>
             </ul>
 
 
             <ul class="list-unstyled CTAs">
+                <li>
+                    <a data-toggle="modal" aria-expanded="false" class = "btn"  data-target="#folder-modal" >
+                      Add Folder
+                    </a>
+                  </li>
+                  <li>
+                      <a data-toggle="modal" aria-expanded="false" class = "btn"  data-target="#delete-folder-modal">
+                       Delete Folder
+                      </a>
+                    </li>
                 <li>
                     <a href="#" class="addserver"  data-toggle="modal" data-target="#addserver">Add Server</a>
                 </li>
@@ -193,6 +198,34 @@
       </div>
     </div>
 
+
+  <div class="modal fade"  tabindex="-1" id = "delete-folder-modal" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLongTitle">Delete Folder</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+              <form >
+                  <div class="form-group">
+                      <label >Folder select</label>
+                      <select class="form-control" name="folder" v-model="folder">
+                        <option v-for="(value,key) in items" v-bind:value="key">{[key]}</option>
+                      </select>
+                    </div>
+              </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" data-dismiss="modal" @click="delete_folder">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script type="text/javascript">
 var storage = window.localStorage;
 var curr_key = 0;
@@ -244,6 +277,9 @@ var folder = new Vue({
       if(typeof(serverinfo[this.folder]) == "undefined" || typeof(serverinfo[this.folder]) == "" )
         serverinfo[this.folder] = [];
       storage.setItem("serverinfo",JSON.stringify(serverinfo));
+      sidebar.items = JSON.parse(storage.getItem("serverinfo"));
+      deletefolder.items = JSON.parse(storage.getItem("serverinfo"));
+      group1.items = JSON.parse(storage.getItem("serverinfo"));
     }
   }
 })
@@ -284,7 +320,7 @@ var group1 = new Vue({
       read_serverinfo();
       // console.log('sys');
       console.log(this.folder);
-      if(typeof(serverinfo[this.folder]) == "undefined" || typeof(serverinfo[this.folder]) == "object")
+      if(typeof(serverinfo[this.folder]) == "undefined")
         serverinfo[this.folder]=[];
       var key={
         remark:this.remark,
@@ -296,29 +332,33 @@ var group1 = new Vue({
       }
       serverinfo[this.folder].push(key);
       storage.setItem("serverinfo",JSON.stringify(serverinfo));
+      sidebar.items = JSON.parse(storage.getItem("serverinfo"));
+      deletefolder.items = JSON.parse(storage.getItem("serverinfo"));
     }
   }
 });
 
-// var group2 = new Vue({
-// delimiters: ['{[', ']}'],
-//   el: '#group2',
-//   data: {
-//     items: JSON.parse(storage.getItem("serverinfo"))
-//   },
-//   methods: {
-//     login: function(item) {
-//       // alert(item.remark);
-//       if (item.key != curr_key){
-//       curr_key = item.key;
-//       t_g.setCursorPosition(0,0)
-//       t_g.clear()
-//       t_g.clearScrollback()
-//       socket.emit("login",item);
-//       }
-//     }
-//   }
-// });
+var deletefolder = new Vue({
+  delimiters: ['{[', ']}'],
+  el: '#delete-folder-modal',
+  data:{
+    items:JSON.parse(storage.getItem("serverinfo")),
+    folder:''
+  },
+  methods:{
+    delete_folder: function(event){
+      read_serverinfo();
+      for(let key in serverinfo){
+        if(this.folder == key){
+          serverinfo[this.folder] = undefined;
+          storage.setItem("serverinfo",JSON.stringify(serverinfo));
+          sidebar.items = JSON.parse(storage.getItem("serverinfo"));
+          alert("Delete successfully");
+        }
+      }
+    }
+  }
+});
 
 var edit = new Vue({
 delimiters: ['{[', ']}'],
